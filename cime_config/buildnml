@@ -235,16 +235,26 @@ def _create_drv_namelists(case, infile, confdir, nmlgen, files):
                 valid = False
         if valid:
             valid_comps.append(item)
-
-    # set the driver rpointer file if there is only one non-stub component then skip mediator 
    
-    if len(valid_comps) == 2 and  "dwav" not in case.get_value("COMP_WAV") and "dlnd" not in case.get_value("COMP_LND"):
+    # Determine if there are any data components in the compset
+    datamodel_in_compset = ("datm" in case.get_value("COMP_ATM") or
+                            "dice" in case.get_value("COMP_ICE") or 
+                            "dlnd" in case.get_value("COMP_LND") or 
+                            "docn" in case.get_value("COMP_OCN") or
+                            "drof" in case.get_value("COMP_ROF") or
+                            "dwav" in case.get_value("COMP_WAV"))
+
+    # Determine if will skip the mediator and then set the 
+    # driver rpointer file if there is only one non-stub component then skip mediator 
+    if len(valid_comps) == 2 and not datamodel_in_compset:
+        # skip the mediator if there is a prognostic component and all other components are stub
         skip_mediator = True
         valid_comps.remove("CPL")
         nmlgen.set_value('mediator_present', value='.false.')
         nmlgen.set_value("drv_restart_pointer", value="none")
         nmlgen.set_value("component_list", value=" ".join(valid_comps))
     else:
+        # do not skip mediator if there is a data component but all other components are stub
         skip_mediator = False
         nmlgen.set_value("drv_restart_pointer", value="rpointer.cpl")
         valid_comps_string = " ".join(valid_comps)
