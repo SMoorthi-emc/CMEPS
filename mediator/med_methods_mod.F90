@@ -10,7 +10,7 @@ module med_methods_mod
   use ESMF               , only : ESMF_GeomType_Flag, ESMF_FieldStatus_Flag, ESMF_PoleMethod_Flag
   use ESMF               , only : ESMF_LogWrite, ESMF_LOGMSG_INFO, ESMF_SUCCESS, ESMF_FAILURE
   use ESMF               , only : ESMF_LOGERR_PASSTHRU, ESMF_LogFoundError, ESMF_LOGMSG_ERROR
-  use ESMF               , only : ESMF_MAXSTR, ESMF_LOGMSG_WARNING, ESMF_POLEMETHOD_ALLAVG
+  use ESMF               , only : ESMF_MAXSTR, ESMF_LOGMSG_WARNING, ESMF_POLEMETHOD_ALLAVG, ESMF_ITEMORDER_ADDORDER
   use med_constants_mod  , only : dbug_flag => med_constants_dbug_flag
   use med_constants_mod  , only : czero => med_constants_czero
   use med_constants_mod  , only : spval_init => med_constants_spval_init
@@ -185,19 +185,19 @@ contains
     ! ----------------------------------------------
 
     use ESMF , only : ESMF_Field, ESMF_FieldGet, ESMF_FieldCreate
-    use ESMF , only : ESMF_FieldBundle, ESMF_FieldBundleAdd, ESMF_FieldBundleCreate 
+    use ESMF , only : ESMF_FieldBundle, ESMF_FieldBundleAdd, ESMF_FieldBundleCreate
     use ESMF , only : ESMF_State, ESMF_StateGet, ESMF_Mesh, ESMF_MeshLoc
     use ESMF , only : ESMF_AttributeGet, ESMF_INDEX_DELOCAL
 
     ! input/output variables
     type(ESMF_State)      , intent(in)           :: StateIn          ! input state
-    type(ESMF_FieldBundle), intent(inout)        :: FBout            ! output field bundle 
+    type(ESMF_FieldBundle), intent(inout)        :: FBout            ! output field bundle
     character(len=*)      , intent(in)           :: flds_scalar_name ! name of scalar fields
     character(len=*)      , intent(in)           :: name
     integer               , intent(out)          :: rc
 
     ! local variables
-    logical            :: isPresent 
+    logical            :: isPresent
     integer            :: n,n1
     type(ESMF_Field)   :: lfield
     type(ESMF_Field)   :: newfield
@@ -294,7 +294,7 @@ contains
              call ESMF_FieldGet(lfield, farrayptr=dataptr1d, rc=rc)
              if (chkerr(rc,__LINE__,u_FILE_u)) return
 
-             ! create new field without an ungridded dimension 
+             ! create new field without an ungridded dimension
              newfield = ESMF_FieldCreate(lmesh, dataptr1d, ESMF_INDEX_DELOCAL, &
                   meshloc=meshloc, name=lfieldNameList(n), rc=rc)
              if (chkerr(rc,__LINE__,u_FILE_u)) return
@@ -338,7 +338,7 @@ contains
     use ESMF , only : ESMF_TYPEKIND_R8, ESMF_FIELDSTATUS_EMPTY, ESMF_AttributeGet
 
     ! input/output variables
-    type(ESMF_FieldBundle), intent(inout)        :: FBout            ! output field bundle 
+    type(ESMF_FieldBundle), intent(inout)        :: FBout            ! output field bundle
     character(len=*)      , intent(in)           :: flds_scalar_name ! name of scalar fields
     character(len=*)      , intent(in), optional :: fieldNameList(:) ! names of fields to use in output field bundle
     type(ESMF_FieldBundle), intent(in), optional :: FBgeom           ! input field bundle geometry to use
@@ -431,7 +431,7 @@ contains
       call ESMF_FieldBundleGet(FBflds, fieldCount=fieldCount, rc=rc)
       if (chkerr(rc,__LINE__,u_FILE_u)) return
       allocate(lfieldNameList(fieldCount))
-      call ESMF_FieldBundleGet(FBflds, fieldNameList=lfieldNameList, rc=rc)
+      call ESMF_FieldBundleGet(FBflds, fieldNameList=lfieldNameList, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
       if (chkerr(rc,__LINE__,u_FILE_u)) return
       if (dbug_flag > 5) then
          call ESMF_LogWrite(trim(subname)//":"//trim(lname)//" fieldNameList from FBflds", ESMF_LOGMSG_INFO, rc=rc)
@@ -449,7 +449,7 @@ contains
       call ESMF_FieldBundleGet(FBgeom, fieldCount=fieldCount, rc=rc)
       if (chkerr(rc,__LINE__,u_FILE_u)) return
       allocate(lfieldNameList(fieldCount))
-      call ESMF_FieldBundleGet(FBgeom, fieldNameList=lfieldNameList, rc=rc)
+      call ESMF_FieldBundleGet(FBgeom, fieldNameList=lfieldNameList, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
       if (chkerr(rc,__LINE__,u_FILE_u)) return
       if (dbug_flag > 5) then
          call ESMF_LogWrite(trim(subname)//":"//trim(lname)//" fieldNameList from FBgeom", ESMF_LOGMSG_INFO, rc=rc)
@@ -541,7 +541,7 @@ contains
        do n = 1, fieldCount
 
           ! Note that input fields come from ONE of FBFlds, STflds, or fieldNamelist input argument
-          if (present(FBFlds) .or. present(STflds)) then 
+          if (present(FBFlds) .or. present(STflds)) then
 
              ! ungridded dimensions might be present in the input states or field bundles
              if (present(FBflds)) then
@@ -587,14 +587,14 @@ contains
                 if (chkerr(rc,__LINE__,u_FILE_u)) return
              end if
 
-          else if (present(fieldNameList)) then 
-             
+          else if (present(fieldNameList)) then
+
              ! Assume no ungridded dimensions if just the field name list is give
              field = ESMF_FieldCreate(lmesh, ESMF_TYPEKIND_R8, meshloc=meshloc, name=lfieldNameList(n), rc=rc)
              if (chkerr(rc,__LINE__,u_FILE_u)) return
-             
+
           end if
-             
+
           ! Add the created field bundle FBout
           if (dbug_flag > 1) then
              call ESMF_LogWrite(trim(subname)//":"//trim(lname)//" adding field "//trim(lfieldNameList(n)), &
@@ -602,7 +602,7 @@ contains
           end if
           call ESMF_FieldBundleAdd(FBout, (/field/), rc=rc)
           if (chkerr(rc,__LINE__,u_FILE_u)) return
-          
+
        enddo  ! fieldCount
     endif  ! fieldcountgeom
 
@@ -656,7 +656,7 @@ contains
     endif
 
     allocate(lfieldnamelist(fieldCount))
-    call ESMF_FieldBundleGet(FB, fieldNameList=lfieldnamelist, rc=rc)
+    call ESMF_FieldBundleGet(FB, fieldNameList=lfieldnamelist, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
     if (chkerr(rc,__LINE__,u_FILE_u)) return
 
     fieldname = lfieldnamelist(fieldnum)
@@ -1680,7 +1680,7 @@ contains
 
     call ESMF_FieldBundleGet(FB, fieldName=trim(fldname), isPresent=isPresent, rc=rc)
     if (chkerr(rc,__LINE__,u_FILE_u)) then
-       call ESMF_LogWrite(trim(subname)//" Error checking field: "//trim(fldname), & 
+       call ESMF_LogWrite(trim(subname)//" Error checking field: "//trim(fldname), &
             ESMF_LOGMSG_ERROR)
        return
     endif
@@ -1771,7 +1771,7 @@ contains
         if (chkerr(rc,__LINE__,u_FILE_u)) return
         if (nnodes == 0 .and. nelements == 0) lrank = 0
 
-      else  
+      else
          call ESMF_LogWrite(trim(subname)//": ERROR geomtype not supported ", &
               ESMF_LOGMSG_INFO, rc=rc)
         rc = ESMF_FAILURE
@@ -3156,7 +3156,7 @@ contains
     else
       scalar_value = 0.0_R8
       call ESMF_LogWrite(trim(subname)//": no ESMF_Field found named: "//trim(flds_scalar_name), ESMF_LOGMSG_INFO)
-    end if 
+    end if
 
   end subroutine med_methods_State_GetScalar
 
@@ -3372,7 +3372,7 @@ contains
 
   subroutine med_methods_FB_getNumFlds(FB, string, nflds, rc)
 
-    ! ---------------------------------------------- 
+    ! ----------------------------------------------
     ! Determine if fieldbundle is created and if so, the number of non-scalar
     ! fields in the field bundle
     ! ----------------------------------------------
@@ -3390,7 +3390,7 @@ contains
 
     if (.not. ESMF_FieldBundleIsCreated(FB)) then
        call ESMF_LogWrite(trim(string)//": has not been created, returning", ESMF_LOGMSG_INFO)
-       nflds = 0 
+       nflds = 0
     else
        ! Note - the scalar field has been removed from all mediator
        ! field bundles - so this is why we check if the fieldCount is 0 and not 1 here
@@ -3408,7 +3408,7 @@ contains
 
   subroutine med_methods_States_GetSharedFlds(State1, State2, flds_scalar_name, fldnames_shared, rc)
 
-    ! ---------------------------------------------- 
+    ! ----------------------------------------------
     ! Get shared Fld names between State1 and State2 and
     ! allocate the return array fldnames_shared
     ! ----------------------------------------------
@@ -3474,4 +3474,3 @@ contains
   end subroutine med_methods_States_GetSharedFlds
 
 end module med_methods_mod
-
