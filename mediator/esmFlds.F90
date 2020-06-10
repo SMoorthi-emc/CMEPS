@@ -364,7 +364,7 @@ contains
 #endif
     ! input/output variables
     type(ESMF_State)            , intent(inout)            :: state
-    type(med_fldlist_type), intent(in)               :: fldList
+    type(med_fldlist_type)      , intent(in)               :: fldList
     character(len=*)            , intent(in)               :: flds_scalar_name
     integer                     , intent(in)               :: flds_scalar_num
     character(len=*)            , intent(in)               :: tag
@@ -464,7 +464,7 @@ contains
     do n = 1, nflds
        shortname = fldList%flds(n)%shortname
 
-       ! call ESMF_LogWrite(subname//' fld = '//trim(shortname), ESMF_LOGMSG_INFO, rc=dbrc)
+!      call ESMF_LogWrite(subname//' fld = '//trim(shortname), ESMF_LOGMSG_INFO, rc=dbrc)
        if (NUOPC_IsConnected(state, fieldName=shortname)) then
 
           call ESMF_StateGet(state, field=field, itemName=trim(shortname), rc=rc)

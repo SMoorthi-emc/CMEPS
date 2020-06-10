@@ -1,6 +1,6 @@
 [submodule "nems/lib/ParallelIO"]
 	path = nems/lib/ParallelIO
-	url = https://github.com/NCAR/ParallelIO.git
+	url = https://github.com/NCAR/ParallelIO
 	branch = master
 [submodule "nems/lib/genf90"]
 	path = nems/lib/genf90
