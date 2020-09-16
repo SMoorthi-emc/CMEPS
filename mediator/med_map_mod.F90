@@ -1107,6 +1107,7 @@ contains
     type(ESMF_Field) , intent(inout) :: dstfield
     real(r8)         , intent(in)    :: frac(:)
     integer          , intent(out)   :: rc
+    real, parameter   :: epsln=1.0e-12_r8
 
     ! local variables
     integer           :: i,n
@@ -1127,7 +1128,8 @@ contains
        call ESMF_FieldGet(dstfield, farrayPtr=data1d, rc=rc)
        if (chkerr(rc,__LINE__,u_FILE_u)) return
        do i= 1,size(data1d)
-          if (frac(i) == 0.0_R8) then
+!         if (frac(i) == 0.0_R8) then
+          if (frac(i) < epsln) then
              data1d(i) = 0.0_R8
           else
              data1d(i) = data1d(i)/frac(i)
@@ -1141,7 +1143,8 @@ contains
        do n = 1,ungriddedUbound(1)
           if (gridToFieldMap(1) == 1) then
              do i = 1,size(data2d,dim=1)
-                if (frac(i) == 0.0_r8) then
+!               if (frac(i) == 0.0_r8) then
+                if (frac(i) < epsln) then
                    data2d(i,n) = 0.0_r8
                 else
                    data2d(i,n) = data2d(i,n)/frac(i)
@@ -1149,7 +1152,8 @@ contains
              end do
           else if (gridToFieldMap(1) == 2) then
              do i = 1,size(data2d,dim=2)
-                if (frac(i) == 0.0_r8) then
+!               if (frac(i) == 0.0_r8) then
+                if (frac(i) < epsln) then
                    data2d(n,i) = 0.0_r8
                 else
                    data2d(n,i) = data2d(n,i)/frac(i)
