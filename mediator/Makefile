@@ -8,11 +8,11 @@ ESMF_VERSION_MINOR ?= 0
 CPPDEFS += -DESMF_VERSION_MAJOR=$(ESMF_VERSION_MAJOR) -DESMF_VERSION_MINOR=$(ESMF_VERSION_MINOR)
 
 ifndef PIO_INC
-$(error PIO_INC should point to PIO include directory.)
+ $(error PIO_INC should point to PIO include directory.)
 endif
 
 ifeq ($(INTERNAL_PIO_INIT),1)
-CPPDEFS += -DINTERNAL_PIO_INIT
+ CPPDEFS += -DINTERNAL_PIO_INIT
 endif
 
 LIBRARY := libcmeps.a
